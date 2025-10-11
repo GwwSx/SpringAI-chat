@@ -8,7 +8,7 @@ class SpringAiDemoApplicationTests {
 
     @Test
     void contextLoads() {
-
+        System.out.println("123");
     }
 
 }
