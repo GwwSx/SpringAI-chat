@@ -30,26 +30,28 @@ export const sendStreamingChatMessage = async (message, model, onChunkReceived) 
     ? '/api/ai/qwenClientStream' 
     : '/api/ai/clientStream';
   
-  const response = await axios.get(endpoint, {
-    params: { msg: message },
-    responseType: 'stream'
-  });
-
-  return new Promise((resolve, reject) => {
-    const stream = response.data;
+  const url = new URL(endpoint, window.location.origin);
+  url.searchParams.append('msg', message);
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
     
-    stream.on('data', (chunk) => {
-      const text = decoder.decode(chunk, { stream: true });
-      onChunkReceived(text);
-    });
-    
-    stream.on('end', () => {
-      resolve();
-    });
-    
-    stream.on('error', (err) => {
-      reject(new Error(`Stream error: ${err.message}`));
-    });
-  });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value, { stream: true });
+      onChunkReceived(chunk);
+    }
+  } catch (error) {
+    console.error('Stream error:', error);
+    throw error;
+  }
 };
