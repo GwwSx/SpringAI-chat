@@ -5,14 +5,20 @@ import com.zijiang.springaidemo.config.ChatConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName AIAssistantService
@@ -34,6 +40,12 @@ public class ChatClientService {
     private static final String SYSTEM_MESSAGE = "" +
             "你是一个法律助手，只回答法律问题，其它问题回复，我只能回答法律相关问题，其它无可奉告" +
             "";
+
+    @Value("classpath:templates/prompt/chat-template.txt")
+    private org.springframework.core.io.Resource promptTemplate01;
+
+    @Value("classpath:templates/prompt/system-chat-template.txt")
+    private org.springframework.core.io.Resource systemPromptTemplate01;
 
     // 构造器注入
     // private final ChatClient dashScopeChatClient;
@@ -104,4 +116,46 @@ public class ChatClientService {
 
         return chatAns + text;
     }
+
+    // qwen steam promptTemplate 1
+    // public Flux<String> qwenStreamPromptTemplate(String topic, String output, int wordCount) {
+    //     PromptTemplate promptTemplate = new PromptTemplate("" +
+    //             "讲一个关于{topic}的故事" +
+    //             "并以{output}的格式输出" +
+    //             "字数{wordCount}左右");
+    //
+    //     Prompt prompt = promptTemplate.create(
+    //             Map.of("topic", "法律", "output", "markdown", "wordCount", 200)
+    //     );
+    //
+    //     return qwenChatClient.prompt(prompt).stream().content();
+    // }
+
+    // qwen steam promptTemplate 2
+    public Flux<String> qwenStreamPromptTemplate(String topic, String output, int wordCount) {
+        PromptTemplate promptTemplate = new PromptTemplate(promptTemplate01);
+
+        Prompt prompt = promptTemplate.create(
+                Map.of("topic", "法律", "output", "markdown", "wordCount", 200)
+        );
+
+        return qwenChatClient.prompt(prompt).stream().content();
+    }
+
+    // 角色边界划分提示词模板
+    // qwen steam roles border demarcation promptTemplate 1
+    public Flux<String> qwenStreamRolesPromptTemplate(String systemTopic, String userTopic) {
+        // 系统提示词
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemPromptTemplate01);
+        Message systemPromptMessage = systemPromptTemplate.createMessage(Map.of("systemTopic", systemTopic));
+        // 用户提示词
+        PromptTemplate promptTemplate = new PromptTemplate("解释一下{userTopic}");
+        Message userPromptMessage = promptTemplate.createMessage(Map.of("userTopic", userTopic));
+
+        Prompt prompt = new Prompt(List.of(systemPromptMessage, userPromptMessage));
+
+        return qwenChatClient.prompt(prompt).stream().content();
+    }
+
+
 }

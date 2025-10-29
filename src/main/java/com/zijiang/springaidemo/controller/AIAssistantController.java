@@ -85,4 +85,17 @@ public class AIAssistantController {
         return chatClientService.qwenStream(input);
     }
 
+    @GetMapping("/qwenClientPromptTemplate")
+    public Flux<String> qwenClientPromptTemplate(@RequestParam("topic") String topic,
+                                                 @RequestParam("output") String output,
+                                                 @RequestParam("wordCount") int wordCount) {
+        return chatClientService.qwenStreamPromptTemplate(topic, output, wordCount);
+    }
+
+    @GetMapping("/qwenClientRolesPromptTemplate")
+    public Flux<String> qwenClientPromptTemplate(@RequestParam("systemTopic") String systemTopic,
+                                                 @RequestParam("userTopic") String userTopic) {
+        return chatClientService.qwenStreamRolesPromptTemplate(systemTopic, userTopic);
+    }
+
 }

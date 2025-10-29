@@ -1,0 +1,1 @@
+讲一个关于{topic}的故事,并以{output}的格式输出,字数{wordCount}左右"
