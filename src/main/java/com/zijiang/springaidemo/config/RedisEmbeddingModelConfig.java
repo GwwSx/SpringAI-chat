@@ -26,30 +26,44 @@ public class RedisEmbeddingModelConfig {
 
     @Value("${spring.ai.dashscope.embedding.options.model}")
     private String qwEmbeddingModel;
-
     @Value("${spring.ai.vectorstore.redis.initialize-schema}")
     private boolean initializeSchema;
+    @Resource
+    private EmbeddingModel embeddingModel;
 
-    @Value("${spring.ai.vectorstore.redis.index-name}")
-    private String index;
+    // 注入自定义索引1的参数（产品索引）
+    @Value("${spring.ai.vectorstore.redis.product.index-name}")
+    private String productIndexName;
+    @Value("${spring.ai.vectorstore.redis.product.prefix}")
+    private String productPrefix;
 
-    @Value("${spring.ai.vectorstore.redis.prefix}")
-    private String prefix;
+    // 注入自定义索引2的参数（用户索引）
+    @Value("${spring.ai.vectorstore.redis.user.index-name}")
+    private String userIndexName;
+    @Value("${spring.ai.vectorstore.redis.user.prefix}")
+    private String userPrefix;
 
     @Resource
     private RedisConfig redisConfig;
 
-    @Resource
-    private EmbeddingModel embeddingModel;
-
-
-    @Bean(name = "myRedisVectorStore")
-    public RedisVectorStore redisVectorStore() {
+    @Bean(name = "productRedisVectorStore")
+    public RedisVectorStore productRedisVectorStore() {
         JedisPooled jedisPooled = new JedisPooled(redisConfig.getHost(), redisConfig.getPort(), null, redisConfig.getPassword());
-        log.info("RedisVectorStore initialized with host: {}, port: {}, password: {}, database: {}", redisConfig.getHost(), redisConfig.getPort(), redisConfig.getPassword(), redisConfig.getDatabase());
+        log.info("productRedisVectorStore initialized with host: {}, port: {}, password: {}, database: {}", redisConfig.getHost(), redisConfig.getPort(), redisConfig.getPassword(), redisConfig.getDatabase());
         return RedisVectorStore.builder(jedisPooled, embeddingModel)
-                .indexName(index)
-                .prefix(prefix)
+                .indexName(productIndexName)
+                .prefix(productPrefix)
+                .initializeSchema(initializeSchema)
+                .build();
+    }
+
+    @Bean(name = "userRedisVectorStore")
+    public RedisVectorStore userRedisVectorStore() {
+        JedisPooled jedisPooled = new JedisPooled(redisConfig.getHost(), redisConfig.getPort(), null, redisConfig.getPassword());
+        log.info("userRedisVectorStore initialized with host: {}, port: {}, password: {}, database: {}", redisConfig.getHost(), redisConfig.getPort(), redisConfig.getPassword(), redisConfig.getDatabase());
+        return RedisVectorStore.builder(jedisPooled, embeddingModel)
+                .indexName(userIndexName)
+                .prefix(userPrefix)
                 .initializeSchema(initializeSchema)
                 .build();
     }

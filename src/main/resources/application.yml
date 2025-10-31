@@ -30,8 +30,13 @@ spring:
     vectorstore:
       redis:
         initialize-schema: true
-        prefix: custom-prefix
-        index-name: custom-index
+        product:
+          index-name: product-index
+          prefix: product-embedding
+          # 自定义索引2：例如用于存储用户相关向量
+        user:
+          index-name: user-index
+          prefix: user-embedding
 
 
 

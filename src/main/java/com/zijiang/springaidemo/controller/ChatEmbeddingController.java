@@ -2,6 +2,7 @@ package com.zijiang.springaidemo.controller;
 
 
 import com.zijiang.springaidemo.service.ChatClientService;
+import com.zijiang.springaidemo.service.EmbeddingService;
 import jakarta.annotation.Resource;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingResponse;
@@ -24,22 +25,23 @@ import java.util.List;
 public class ChatEmbeddingController {
 
     @Resource
-    private ChatClientService chatClientService;
+    private EmbeddingService embeddingService;
 
 
-    @GetMapping("/qwenEmbedding")
+    @GetMapping("")
     public EmbeddingResponse qwenEmbedding(@RequestParam("msg") String msg) {
-        return chatClientService.embeddingChat(msg);
+        return embeddingService.embeddingChat(msg);
     }
 
     @GetMapping("/add")
-    public void add() {
-        chatClientService.add();
+    public String add() {
+        embeddingService.add();
+        return "success";
     }
 
     @GetMapping("/getSearch")
     public List<Document> getSearch(@RequestParam("msg") String msg) {
-        return chatClientService.getSearch(msg);
+        return embeddingService.getSearch(msg);
     }
 
 
