@@ -4,8 +4,12 @@ package com.zijiang.springaidemo.config;
 import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
+import com.alibaba.cloud.ai.memory.redis.RedisChatMemoryRepository;
 import lombok.Data;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +29,7 @@ public class ChatConfig {
 
     @Value("${spring.ai.dashscope.api-key}")
     private String apiKey;
-    @Value("${spring.ai.dashscope.model}")
+    @Value("${spring.ai.dashscope.chat.options.model}")
     private String model;
     @Value("${spring.ai.dashscope.deepSeekModel}")
     private String deepSeekModel;
@@ -60,8 +64,17 @@ public class ChatConfig {
     }
 
     @Bean(name = "qwenChatClient")
-    public ChatClient qwenChatClient(@Qualifier("qwen") ChatModel chatModel) {
-        return ChatClient.builder(chatModel).build();
+    public ChatClient qwenChatClient(@Qualifier("qwen") ChatModel chatModel,
+                                     RedisChatMemoryRepository redisChatMemoryRepository) {
+        // 聊天记忆
+        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
+                .chatMemoryRepository(redisChatMemoryRepository)
+                .maxMessages(10)
+                .build();
+
+        return ChatClient.builder(chatModel)
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .build();
     }
 
 

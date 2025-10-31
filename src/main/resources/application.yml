@@ -2,11 +2,37 @@ spring:
   application:
     name: Spring-AI-Demo
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      connect-timeout: 3000
+      timeout: 2000
+      password: 123456
+      username: default
+
+  # 允许Bean定义覆盖
+  main:
+    allow-bean-definition-overriding: true
+
   ai:
     dashscope:
       api-key: ${DASHSCOPE_API_KEY}
-      model: qwen-plus
+      chat:
+        options:
+          model: qwen-plus
+      embedding:
+        options:
+          model: text-embedding-v3
       deepSeekModel: deepseek-v3.1
+
+    vectorstore:
+      redis:
+        initialize-schema: true
+        prefix: custom-prefix
+        index-name: custom-index
+
 
 
 server:

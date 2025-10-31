@@ -21,10 +21,5 @@ public class QwenTest {
     @Autowired
     private ChatClientService chatClientService;
 
-    @Test
-    public void testQwen() {
-        chatClientService.chat("你是谁");
-        System.out.println(chatClientService.chat("你是谁"));
 
-    }
 }

@@ -11,6 +11,7 @@ package com.zijiang.springaidemo.controller;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import com.zijiang.springaidemo.service.ChatClientService;
 import com.zijiang.springaidemo.service.ChatModelService;
+import com.zijiang.springaidemo.vo.StudentRecord;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -96,6 +97,12 @@ public class AIAssistantController {
     public Flux<String> qwenClientPromptTemplate(@RequestParam("systemTopic") String systemTopic,
                                                  @RequestParam("userTopic") String userTopic) {
         return chatClientService.qwenStreamRolesPromptTemplate(systemTopic, userTopic);
+    }
+
+    @GetMapping("/qwenClientRecord/chat")
+    public StudentRecord qwenClientRecord(@RequestParam("name") String name,
+                                          @RequestParam("email") String email) {
+        return chatClientService.qwenClientRecord(name, email);
     }
 
 }

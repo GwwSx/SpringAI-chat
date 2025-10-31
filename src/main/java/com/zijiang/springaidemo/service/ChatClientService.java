@@ -1,24 +1,30 @@
 package com.zijiang.springaidemo.service;
 
 
-import com.zijiang.springaidemo.config.ChatConfig;
+import com.alibaba.cloud.ai.dashscope.embedding.DashScopeEmbeddingOptions;
+import com.zijiang.springaidemo.vo.StudentRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.EmbeddingRequest;
+import org.springframework.ai.embedding.EmbeddingResponse;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
 /**
  * @ClassName AIAssistantService
@@ -36,6 +42,18 @@ public class ChatClientService {
 
     @Resource(name = "qwenChatClient")
     private ChatClient qwenChatClient;
+
+    @Resource
+    private EmbeddingModel embeddingModel;
+
+    // @Resource
+    // private VectorStore vectorStore;
+
+
+    @Resource(name = "myRedisVectorStore")
+    private RedisVectorStore redisVectorStore;
+
+
 
     private static final String SYSTEM_MESSAGE = "" +
             "你是一个法律助手，只回答法律问题，其它问题回复，我只能回答法律相关问题，其它无可奉告" +
@@ -158,4 +176,75 @@ public class ChatClientService {
     }
 
 
+    /**
+     * 格式化输出
+     * @param name
+     * @param email
+     * @return
+     */
+    public StudentRecord qwenClientRecord(String name, String email) {
+        String userPrompt = "我的姓名是{name}，我的邮箱是{email}";
+
+        // 方法1
+        //  StudentRecord studentRecord = qwenChatClient.prompt().user(new Consumer<ChatClient.PromptUserSpec>() {
+        //     @Override
+        //     public void accept(ChatClient.PromptUserSpec promptUserSpec) {
+        //         promptUserSpec.text(userPrompt)
+        //                 .params(Map.of("name", name, "email", email));
+        //     }
+        // }).call().entity(StudentRecord.class);
+
+        // 方法2
+        StudentRecord studentRecord = qwenChatClient.prompt().user(promptUserSpec -> promptUserSpec.text(userPrompt)
+                .params(Map.of("name", name, "email", email))).call().entity(StudentRecord.class);
+        return studentRecord;
+    }
+
+    // chat memory
+    public String chatMemoryChat(String msg, String memoryId) {
+        // return qwenChatClient.prompt(msg).advisors(new Consumer<ChatClient.AdvisorSpec>() {
+        //     @Override
+        //     public void accept(ChatClient.AdvisorSpec advisorSpec) {
+        //         advisorSpec.param(CONVERSATION_ID, memoryId);
+        //     }
+        // }).call().content();
+
+        return qwenChatClient.prompt(msg)
+                .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID, memoryId))
+                .call()
+                .content();
+    }
+
+
+    // embedding
+    public EmbeddingResponse embeddingChat(String msg) {
+        EmbeddingResponse embeddingResponse = embeddingModel.call(
+                new EmbeddingRequest(List.of("Hello World", "World is big and salvation is near", msg),
+                        DashScopeEmbeddingOptions
+                                .builder()
+                                .withModel("text-embedding-v3")
+                                .build()
+                )
+        );
+
+        return embeddingResponse;
+    }
+
+    // embedding
+    public void add() {
+        List<Document> documents = List.of(
+                new Document("Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!!"),
+                new Document("The World is Big and Salvation Lurks Around the Corner"),
+                new Document("You walk forward facing the past and you turn back toward the future."));
+        // vectorStore.add(documents);
+        redisVectorStore.add(documents);
+    }
+
+    // 查找相似
+    public List<Document> getSearch(String msg) {
+        SearchRequest searchRequest = SearchRequest.builder().query(msg).topK(5).build();
+        // List<Document> documents = vectorStore.similaritySearch(searchRequest);
+        List<Document> documents = redisVectorStore.similaritySearch(searchRequest);
+        return documents;
+    }
 }
