@@ -38,7 +38,9 @@ spring:
           index-name: user-index
           prefix: user-embedding
 
-
+# RAG检索文档加密密钥
+encryption:
+  secret-key: my-secret-key
 
 server:
   port: 8081
