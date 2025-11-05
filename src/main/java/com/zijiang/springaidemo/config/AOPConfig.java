@@ -20,11 +20,11 @@ public class AOPConfig {
     @Value("${aop.debug.controller}")
     private Boolean controller;
 
-    @Value("${aop.debug.service}")
-    private Boolean service;
-
-    @Value("${aop.debug.log-record}")
-    private Boolean logRecord;
+    // @Value("${aop.debug.service}")
+    // private Boolean service;
+    //
+    // @Value("${aop.debug.log-record}")
+    // private Boolean logRecord;
 
 
 }
