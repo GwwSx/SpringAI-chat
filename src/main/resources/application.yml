@@ -42,6 +42,11 @@ spring:
 encryption:
   secret-key: my-secret-key
 
+# 日志切面
+aop:
+  debug:
+    controller: true
+
 server:
   port: 8081
   servlet:
