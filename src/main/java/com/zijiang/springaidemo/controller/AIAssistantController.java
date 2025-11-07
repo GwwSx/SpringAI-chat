@@ -105,4 +105,9 @@ public class AIAssistantController {
         return chatClientService.qwenClientRecord(name, email);
     }
 
+    @GetMapping("/mcp/chat")
+    public Flux<String> qwenClientRecord(@RequestParam("msg") String city) {
+        return chatClientService.mcpChat(city);
+    }
+
 }
