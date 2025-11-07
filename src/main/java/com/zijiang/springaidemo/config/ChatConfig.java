@@ -11,6 +11,7 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +66,8 @@ public class ChatConfig {
 
     @Bean(name = "qwenChatClient")
     public ChatClient qwenChatClient(@Qualifier("qwen") ChatModel chatModel,
-                                     RedisChatMemoryRepository redisChatMemoryRepository) {
+                                     RedisChatMemoryRepository redisChatMemoryRepository,
+                                     ToolCallbackProvider tools) {
         // 聊天记忆
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(redisChatMemoryRepository)
@@ -74,6 +76,7 @@ public class ChatConfig {
 
         return ChatClient.builder(chatModel)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .defaultToolCallbacks(tools.getToolCallbacks())
                 .build();
     }
 

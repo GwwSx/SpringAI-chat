@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: Mcp-Server
+  ai:
+    mcp:
+      server:
+        type: async
+        name: customer-mcp-server
+        version: 1.0.0
+server:
+  port: 8082
+  servlet:
+    context-path: /mcp
+    encoding:
+      # 启用字符编码过滤器
+      enabled: true
+      # 强制使用指定的字符编码
+      force: true
+      # 设置字符编码为UTF-8
+      charset: UTF-8
+
+
+
+
+
+
+
+
+
+

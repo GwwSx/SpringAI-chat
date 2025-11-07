@@ -235,4 +235,7 @@ public class ChatClientService {
                 .content();
     }
 
+    public Flux<String> mcpChat(String city) {
+        return qwenChatClient.prompt(city).stream().content();
+    }
 }
