@@ -7,6 +7,13 @@ spring:
         type: async
         name: customer-mcp-server
         version: 1.0.0
+      client:
+        stdio:
+          servers-configuration: classpath:/mcp/mcp-server.json
+        toolcallback:
+          enabled: true
+        request-timeout: 20s
+
 server:
   port: 8082
   servlet:

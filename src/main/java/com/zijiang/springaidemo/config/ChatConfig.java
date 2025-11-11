@@ -69,13 +69,13 @@ public class ChatConfig {
                                      RedisChatMemoryRepository redisChatMemoryRepository,
                                      ToolCallbackProvider tools) {
         // 聊天记忆
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
-                .chatMemoryRepository(redisChatMemoryRepository)
-                .maxMessages(10)
-                .build();
+        // MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
+        //         .chatMemoryRepository(redisChatMemoryRepository)
+        //         .maxMessages(10)
+        //         .build();
 
         return ChatClient.builder(chatModel)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                // .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .defaultToolCallbacks(tools.getToolCallbacks())
                 .build();
     }
